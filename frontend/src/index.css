@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Core Colors */
+  --bg-color: #0b0d17;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent-color: #6366f1;
+  --accent-hover: #4f46e5;
+  --danger-color: #ef4444;
+  --danger-hover: #dc2626;
+
+  /* Surfaces & Glassmorphism */
+  --surface-main: rgba(15, 23, 42, 0.6);
+  --surface-sidebar: rgba(15, 23, 42, 0.8);
+  --border-color: rgba(255, 255, 255, 0.08);
+
+  /* Message Colors */
+  --user-msg-bg: #2e3b5e;
+  --bot-msg-bg: rgba(30, 41, 59, 0.6);
+
+  /* Layout */
+  --sidebar-width: 320px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+
+  /* Space-inspired background: Deep gradient + Faint stars + Noise */
+  background-image:
+    /* Soft glowing orbs */
+    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.1) 0%, transparent 40%),
+    /* Faint noise texture using data URI svg */
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E"),
+    /* Base dark gradient */
+    linear-gradient(to bottom right, #0b0d17, #0f172a);
+
+  /* Subtle stars effect using shadows */
+  background-attachment: fixed;
+}
+
+/* Star field generator in CSS */
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: -1;
+  /* Multiple tiny box shadows simulating stars */
+  box-shadow:
+    10vw 20vh 1px rgba(255, 255, 255, 0.2),
+    30vw 40vh 1px rgba(255, 255, 255, 0.4),
+    50vw 10vh 2px rgba(255, 255, 255, 0.1),
+    70vw 60vh 1px rgba(255, 255, 255, 0.3),
+    90vw 80vh 1px rgba(255, 255, 255, 0.5),
+    20vw 80vh 1px rgba(255, 255, 255, 0.2),
+    80vw 20vh 2px rgba(255, 255, 255, 0.1),
+    40vw 90vh 1px rgba(255, 255, 255, 0.4);
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  /* Reset padding for edge-to-edge layout */
+}
+
+/* Base utility padding for App container */
+@media (min-width: 768px) {
+  #root {
+    padding: 1.5rem;
+  }
+}
