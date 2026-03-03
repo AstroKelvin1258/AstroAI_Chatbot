@@ -3,7 +3,7 @@ import './App.css';
 import HistorySidebar from './components/HistorySidebar';
 import ChatWindow from './components/ChatWindow';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/chat';
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api/chat' : 'http://localhost:3001/api/chat');
 
 function App() {
   const [sessions, setSessions] = useState(() => {
