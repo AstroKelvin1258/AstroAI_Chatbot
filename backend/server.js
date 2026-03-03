@@ -15,12 +15,12 @@ app.get('/health', (req, res) => {
 });
 
 // Chat endpoint
-app.post('/chat', async (req, res) => {
-    const { message } = req.body;
+app.post('/api/chat', async (req, res) => {
+    const { messages } = req.body;
 
-    // Basic validation (reject empty message)
-    if (!message || typeof message !== 'string' || !message.trim()) {
-        return res.status(400).json({ error: 'Message cannot be empty.' });
+    // Basic validation
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+        return res.status(400).json({ error: 'Messages array cannot be empty.' });
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -33,15 +33,18 @@ app.post('/chat', async (req, res) => {
         // Call Gemini API using native fetch
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
+        // Map frontend messages to Gemini API format
+        const formattedContents = messages.map(msg => ({
+            role: msg.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: msg.content }]
+        }));
+
         // Construct request body with system instruction as requested
         const requestBody = {
             systemInstruction: {
-                parts: [{ text: "You are a public AI assistant called AstroAI by Kelvin. You are helpful, practical, and concise. If the user says 'hi' or 'hello' or a similar greeting, always respond FIRST with 'Hello, I am AstroAI by Kelvin. How can I help you today?' before saying anything else. If a user asks questions like 'Who is Kelvin?', 'Who made AstroAI?', or 'Tell me about Kelvin', respond with a short bio: 'Kelvin Boban is the creator of AstroAI. He’s an AI student in the UK with interests in drones/FPV and building AI-powered products.' Do not claim any private personal details beyond this." }]
+                parts: [{ text: "You are AstroAI by Kelvin. Be friendly, practical, and interactive. Answer the user’s question directly. Only greet at the start of a new chat." }]
             },
-            contents: [{
-                role: "user",
-                parts: [{ text: message }]
-            }]
+            contents: formattedContents
         };
 
         const response = await fetch(url, {
@@ -75,7 +78,12 @@ app.post('/chat', async (req, res) => {
 
 // Make sure the Express routes are handled correctly under `/api` in Firebase
 // In Firebase rewrites we rewrite /api/** to Cloud Function "api"
-const api = express();
-api.use('/api', app);
+exports.api = onRequest(app);
 
-exports.api = onRequest(api);
+// Start the local server if running directly (e.g., node server.js)
+if (require.main === module) {
+    const PORT = process.env.PORT || 3001;
+    app.listen(PORT, () => {
+        console.log(`Backend listening on port ${PORT} for local development`);
+    });
+}

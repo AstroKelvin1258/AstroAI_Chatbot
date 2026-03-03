@@ -130,13 +130,21 @@ function App() {
     setIsLoading(true);
 
     try {
-      const requestBody = {
-        message: text.trim() ? text.trim() : 'User sent an attachment.',
-      };
+      const formattedMessages = newMessages.map((msg, index) => {
+        let content = msg.text || '';
+        // If this is the newly added message and it has attachments, append the note
+        if (index === newMessages.length - 1 && attachmentNote) {
+          content += content ? ` [System Note: User attached - ${attachmentNote}]` : `[System Note: User attached - ${attachmentNote}]`;
+        }
+        return {
+          role: msg.role,
+          content: content || 'User sent an attachment.'
+        };
+      });
 
-      if (attachmentNote) {
-        requestBody.message += ` [System Note: User attached - ${attachmentNote}]`;
-      }
+      const requestBody = {
+        messages: formattedMessages,
+      };
 
       if (attachments.image) {
         requestBody.images = [{ mimeType: attachments.image.mimeType, data: attachments.image.data }];
