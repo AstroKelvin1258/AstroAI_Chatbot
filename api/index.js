@@ -56,7 +56,16 @@ app.post('/api/chat', async (req, res) => {
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Gemini API Error:', response.status, errorText);
-            return res.status(500).json({ error: 'Failed to generate a reply.' });
+
+            let MathErrorMsg = 'Failed to generate a reply.';
+            try {
+                const errObj = JSON.parse(errorText);
+                if (errObj.error && errObj.error.message) {
+                    MathErrorMsg = errObj.error.message;
+                }
+            } catch (e) { }
+
+            return res.status(500).json({ error: `Gemini API Error ${response.status}: ${MathErrorMsg}` });
         }
 
         const data = await response.json();
@@ -70,7 +79,7 @@ app.post('/api/chat', async (req, res) => {
         res.json({ reply });
     } catch (error) {
         console.error('Error calling Gemini API:', error);
-        res.status(500).json({ error: 'Internal server error.' });
+        res.status(500).json({ error: `Internal server error: ${error.message}` });
     }
 });
 
