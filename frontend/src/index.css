@@ -33,11 +33,10 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-primary);
-  height: 100vh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
 
   /* Space-inspired background: Deep gradient + Faint stars + Noise */
   background-image:
