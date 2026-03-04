@@ -1,11 +1,11 @@
 # AstroAI - Full-Stack Personal Chatbot
 
-A minimal, beautiful, and robust AI chatbot powered by the Gemini API. Built with a React (Vite) frontend and an Express (Node.js) backend.
+A minimal, beautiful, and robust AI chatbot powered by the Groq Cloud API (Llama 3 models). Built with a React (Vite) frontend and an Express (Node.js) backend.
 
 ## Features
 - **Frontend**: Clean, glassmorphic UI using React and Vanilla CSS. Features include auto-scroll, Enter-to-send, and a "Clear Chat" action.
-- **Backend**: Secure Express API that communicates with Google's Gemini Models. It keeps your API keys secure.
-- **Seamless Integrations**: Easy to run locally and deployable anywhere.
+- **Backend**: Secure Express API that communicates with Groq Cloud. It keeps your API keys secure and allows switching between `llama-3.1-8b-instant` and `llama-3.3-70b-versatile` natively!
+- **Seamless Integrations**: Easy to run locally and deployable anywhere (including Vercel Serverless Functions).
 
 ---
 
@@ -27,9 +27,9 @@ Ensure you have [Node.js](https://nodejs.org/) installed (v18+ recommended since
    ```bash
    cp .env.example .env
    ```
-4. **Important**: Open `backend/.env` and add your Gemini API Key:
+4. **Important**: Go to the [Groq Console](https://console.groq.com/keys) to create an API key. Open `backend/.env` and add your Groq API Key:
    ```
-   GEMINI_API_KEY=your_real_api_key_here
+   GROQ_API_KEY=your_groq_api_key_here
    PORT=3001
    ```
 5. Start the backend:
@@ -60,12 +60,11 @@ Ensure you have [Node.js](https://nodejs.org/) installed (v18+ recommended since
 
 Since this is a full-stack application with a frontend and a backend, the recommended way to deploy is to use a modern hosting platform that handles both, or deploy them individually to services like Render, Vercel, or Heroku.
 
-### Backend Deployment (Render, Heroku, Railways)
-1. Set the build directory to `backend`, install with `npm install`, and start command to `node server.js` (or `npm start`).
-2. **Environment Variables**: Add your `GEMINI_API_KEY` in the hosting provider's dashboard under environment variables/secrets. **Never commit your `.env` file or hardcode keys.**
-3. Your backend will be hosted at a new URL (e.g., `https://astroai-backend.onrender.com`).
+### Backend Deployment (Vercel, Render, Heroku)
+1. **Environment Variables**: Add your `GROQ_API_KEY` in the hosting provider's dashboard (e.g., Vercel Environment Variables). **Never commit your `.env` file or hardcode keys.**
+2. If deploying to **Vercel**, the included `vercel.json` and `api/index.js` automatically handles routing the Express backend as a Serverless Function!
 
 ### Frontend Deployment (Vercel, Netlify)
 1. Set the root directory to `frontend`.
 2. The build command is `npm run build` and output directory is `dist`.
-3. **Environment Variables**: Add `VITE_API_URL` to your hosting provider and set it to your deployed backend's `/api/chat` URL (e.g., `https://astroai-backend.onrender.com/api/chat`). This allows your frontend to securely query the hosted API.
+3. **Environment Variables**: If deploying separately, add `VITE_API_URL` to your hosting provider and set it to your deployed backend's `/api/chat` URL. (This step is automatic on Vercel if you deploy the entire monorepo together!).

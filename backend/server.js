@@ -23,33 +23,37 @@ app.post('/api/chat', async (req, res) => {
         return res.status(400).json({ error: 'Messages array cannot be empty.' });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-        console.error('Missing GEMINI_API_KEY environment variable.');
+        console.error('Missing GROQ_API_KEY environment variable.');
         return res.status(500).json({ error: 'Server configuration error.' });
     }
 
     try {
-        // Call Gemini API using native fetch
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const url = 'https://api.groq.com/openai/v1/chat/completions';
+        const MODEL = 'llama-3.1-8b-instant'; // Constant to allow easy switching to 'llama-3.3-70b-versatile'
 
-        // Map frontend messages to Gemini API format
-        const formattedContents = messages.map(msg => ({
-            role: msg.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: msg.content }]
+        // Map frontend messages to Groq API format
+        const formattedMessages = messages.map(msg => ({
+            role: msg.role === 'assistant' ? 'assistant' : 'user',
+            content: msg.content
         }));
 
-        // Construct request body with system instruction as requested
+        // Add system instruction as the first message
+        formattedMessages.unshift({
+            role: 'system',
+            content: 'You are AstroAI by Kelvin. Be friendly, practical, and interactive. Answer the user’s question directly. Only greet at the start of a new chat.'
+        });
+
         const requestBody = {
-            systemInstruction: {
-                parts: [{ text: "You are AstroAI by Kelvin. Be friendly, practical, and interactive. Answer the user’s question directly. Only greet at the start of a new chat." }]
-            },
-            contents: formattedContents
+            model: MODEL,
+            messages: formattedMessages
         };
 
         const response = await fetch(url, {
             method: 'POST',
             headers: {
+                'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(requestBody)
@@ -57,28 +61,37 @@ app.post('/api/chat', async (req, res) => {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Gemini API Error:', response.status, errorText);
-            return res.status(500).json({ error: 'Failed to generate a reply.' });
+            console.error('Groq API Error:', response.status, errorText);
+
+            let groqErrorMsg = 'Failed to generate a reply.';
+            try {
+                const errObj = JSON.parse(errorText);
+                if (errObj.error && errObj.error.message) {
+                    groqErrorMsg = errObj.error.message;
+                }
+            } catch (e) { }
+
+            return res.status(500).json({ error: `Groq API Error ${response.status}: ${groqErrorMsg}` });
         }
 
         const data = await response.json();
-        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        const reply = data.choices?.[0]?.message?.content;
 
         if (!reply) {
-            console.error('Unexpected Gemini API response structure:', data);
+            console.error('Unexpected Groq API response structure:', data);
             return res.status(500).json({ error: 'Invalid response from model.' });
         }
 
         res.json({ reply });
     } catch (error) {
-        console.error('Error calling Gemini API:', error);
-        res.status(500).json({ error: 'Internal server error.' });
+        console.error('Error calling Groq API:', error);
+        res.status(500).json({ error: `Internal server error: ${error.message}` });
     }
 });
 
 // Make sure the Express routes are handled correctly under `/api` in Firebase
 // In Firebase rewrites we rewrite /api/** to Cloud Function "api"
-exports.api = onRequest(app);
+exports.api = onRequest({ secrets: ["GROQ_API_KEY"] }, app);
 
 // Start the local server if running directly (e.g., node server.js)
 if (require.main === module) {
