@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Paperclip, Send, Image as ImageIcon, Music, X } from 'lucide-react';
 
 const Composer = ({ onSendMessage, isLoading }) => {
     const [input, setInput] = useState('');
@@ -70,24 +71,24 @@ const Composer = ({ onSendMessage, isLoading }) => {
                 <div className="attachments-preview">
                     {attachments.image && (
                         <div className="attachment-chip">
-                            <span className="chip-icon">🖼️</span>
+                            <ImageIcon size={14} className="chip-icon" />
                             <span className="chip-name">{attachments.image.name}</span>
                             <button
                                 className="chip-remove"
                                 onClick={() => removeAttachment('image')}
                                 aria-label="Remove image"
-                            >×</button>
+                            ><X size={14} /></button>
                         </div>
                     )}
                     {attachments.audio && (
                         <div className="attachment-chip">
-                            <span className="chip-icon">🎵</span>
+                            <Music size={14} className="chip-icon" />
                             <span className="chip-name">{attachments.audio.name}</span>
                             <button
                                 className="chip-remove"
                                 onClick={() => removeAttachment('audio')}
                                 aria-label="Remove audio"
-                            >×</button>
+                            ><X size={14} /></button>
                         </div>
                     )}
                 </div>
@@ -100,9 +101,7 @@ const Composer = ({ onSendMessage, isLoading }) => {
                     disabled={isLoading}
                     title="Attach file"
                 >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-                    </svg>
+                    <Paperclip size={18} />
                 </button>
                 <input
                     type="file"
@@ -125,10 +124,7 @@ const Composer = ({ onSendMessage, isLoading }) => {
                     onClick={handleSend}
                     disabled={(!input.trim() && !attachments.image && !attachments.audio) || isLoading}
                 >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="22" y1="2" x2="11" y2="13"></line>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                    </svg>
+                    <Send size={16} />
                 </button>
             </div>
             <p className="footer-hint">AI can make mistakes. Consider verifying important information.</p>

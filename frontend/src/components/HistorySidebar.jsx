@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Plus, X, Trash2, Edit2, Search, Check } from 'lucide-react';
 
 const HistorySidebar = ({
     sessions,
@@ -6,9 +7,32 @@ const HistorySidebar = ({
     onSelectSession,
     onNewChat,
     onDeleteSession,
+    onRenameSession,
+    searchQuery,
+    setSearchQuery,
     isOpen,
     onClose
 }) => {
+    const [editingId, setEditingId] = useState(null);
+    const [editTitle, setEditTitle] = useState('');
+
+    const startEditing = (e, session) => {
+        e.stopPropagation();
+        setEditingId(session.id);
+        setEditTitle(session.title);
+    };
+
+    const saveEdit = (e, id) => {
+        e.stopPropagation();
+        onRenameSession(id, editTitle);
+        setEditingId(null);
+    };
+
+    const handleKeyDown = (e, id) => {
+        if (e.key === 'Enter') saveEdit(e, id);
+        if (e.key === 'Escape') setEditingId(null);
+    };
+
     return (
         <>
             {/* Mobile overlay */}
@@ -18,18 +42,24 @@ const HistorySidebar = ({
                 <div className="sidebar-header">
                     <h2>History</h2>
                     <button className="new-chat-btn" onClick={onNewChat}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
+                        <Plus size={16} />
                         New Chat
                     </button>
                     <button className="close-sidebar-btn" onClick={onClose} aria-label="Close History">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
+                        <X size={20} />
                     </button>
+                </div>
+
+                <div className="search-bar-container">
+                    <div className="search-input-wrapper">
+                        <Search size={16} />
+                        <input
+                            type="text"
+                            placeholder="Search chats..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
                 </div>
 
                 <div className="session-list">
@@ -43,24 +73,45 @@ const HistorySidebar = ({
                                 onClick={() => onSelectSession(session.id)}
                             >
                                 <div className="session-info">
-                                    <span className="session-title">{session.title}</span>
+                                    {editingId === session.id ? (
+                                        <input
+                                            type="text"
+                                            className="session-rename-input"
+                                            value={editTitle}
+                                            onChange={(e) => setEditTitle(e.target.value)}
+                                            onKeyDown={(e) => handleKeyDown(e, session.id)}
+                                            onClick={(e) => e.stopPropagation()}
+                                            autoFocus
+                                            onBlur={(e) => saveEdit(e, session.id)}
+                                        />
+                                    ) : (
+                                        <span className="session-title">{session.title}</span>
+                                    )}
                                     <span className="session-date">
                                         {new Date(session.updatedAt).toLocaleDateString()}
                                     </span>
                                 </div>
-                                <button
-                                    className="delete-session-btn"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onDeleteSession(session.id);
-                                    }}
-                                    title="Delete Chat"
-                                >
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                    </svg>
-                                </button>
+                                <div className="session-actions">
+                                    {editingId === session.id ? (
+                                        <button className="edit-session-btn" onClick={(e) => saveEdit(e, session.id)}>
+                                            <Check size={16} />
+                                        </button>
+                                    ) : (
+                                        <button className="edit-session-btn" onClick={(e) => startEditing(e, session)} title="Rename Chat">
+                                            <Edit2 size={16} />
+                                        </button>
+                                    )}
+                                    <button
+                                        className="edit-session-btn"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onDeleteSession(session.id);
+                                        }}
+                                        title="Delete Chat"
+                                    >
+                                        <Trash2 size={16} color="var(--danger-color)" />
+                                    </button>
+                                </div>
                             </div>
                         ))
                     )}

@@ -27,6 +27,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     localStorage.setItem('astroai_sessions', JSON.stringify(sessions));
@@ -77,6 +78,11 @@ function App() {
       }
       return newSessions;
     });
+  };
+
+  const handleRenameSession = (id, newTitle) => {
+    if (!newTitle.trim()) return;
+    updateSession(id, { title: newTitle.trim() });
   };
 
   const handleClearChat = () => {
@@ -185,14 +191,69 @@ function App() {
     }
   };
 
+  const handleRegenerate = async () => {
+    if (isLoading || messages.length === 0) return;
+
+    // Find last user message
+    const lastUserMsgIndex = [...messages].reverse().findIndex(m => m.role === 'user');
+    if (lastUserMsgIndex === -1) return; // No user message to regenerate from
+
+    const actualIndex = messages.length - 1 - lastUserMsgIndex;
+
+    // Slice off everything after the last user message
+    const newMessages = messages.slice(0, actualIndex + 1);
+    updateSession(currentSessionId, { messages: newMessages });
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      const formattedMessages = newMessages.map((msg) => ({
+        role: msg.role,
+        content: msg.text || msg.content || 'User sent an attachment.'
+      }));
+
+      const requestBody = { messages: formattedMessages };
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to get response');
+
+      const newAssistantMsg = {
+        role: 'assistant',
+        text: data.reply,
+        timestamp: Date.now()
+      };
+
+      updateSession(currentSessionId, {
+        messages: [...newMessages, newAssistantMsg]
+      });
+
+    } catch (err) {
+      console.error('Regenerate error:', err);
+      setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredSessions = sessions.filter(s => s.title.toLowerCase().includes(searchQuery.toLowerCase()));
+
   return (
     <div className="app-container">
       <HistorySidebar
-        sessions={sessions}
+        sessions={filteredSessions}
         currentSessionId={currentSessionId}
         onSelectSession={handleSelectSession}
         onNewChat={handleNewChat}
         onDeleteSession={handleDeleteSession}
+        onRenameSession={handleRenameSession}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
@@ -203,6 +264,7 @@ function App() {
         error={error}
         onSendMessage={handleSendMessage}
         onClearChat={handleClearChat}
+        onRegenerate={handleRegenerate}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
       />
     </div>

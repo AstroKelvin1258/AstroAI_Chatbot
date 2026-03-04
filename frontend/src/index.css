@@ -9,6 +9,9 @@
   --accent-hover: #4f46e5;
   --danger-color: #ef4444;
   --danger-hover: #dc2626;
+  --success-color: #10b981;
+  --code-bg: #1e293b;
+  --code-text: #e2e8f0;
 
   /* Surfaces & Glassmorphism */
   --surface-main: rgba(15, 23, 42, 0.6);
@@ -27,6 +30,24 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.25);
 }
 
 body {

@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import Header from './Header';
 import MessageBubble from './MessageBubble';
 import Composer from './Composer';
+import { AlertCircle, Trash2 } from 'lucide-react';
 
 const ChatWindow = ({
     messages,
@@ -9,6 +10,7 @@ const ChatWindow = ({
     error,
     onSendMessage,
     onClearChat,
+    onRegenerate,
     onToggleSidebar
 }) => {
     const messagesEndRef = useRef(null);
@@ -28,7 +30,12 @@ const ChatWindow = ({
             <div className="chat-messages-area">
                 <div className="messages-list">
                     {messages.map((msg, index) => (
-                        <MessageBubble key={index} message={msg} />
+                        <MessageBubble
+                            key={index}
+                            message={msg}
+                            isLast={index === messages.length - 1}
+                            onRegenerate={onRegenerate}
+                        />
                     ))}
 
                     {isLoading && (
@@ -45,11 +52,7 @@ const ChatWindow = ({
 
                 {error && (
                     <div className="error-toast">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                        </svg>
+                        <AlertCircle size={18} />
                         {error}
                     </div>
                 )}
@@ -57,8 +60,8 @@ const ChatWindow = ({
 
             <div className="chat-actions-bar">
                 {messages.length > 1 && (
-                    <button className="clear-chat-btn" onClick={onClearChat}>
-                        Clear Chat
+                    <button className="clear-chat-btn" onClick={onClearChat} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Trash2 size={14} /> Clear Chat
                     </button>
                 )}
             </div>
